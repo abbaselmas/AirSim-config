@@ -6,25 +6,19 @@
     "RecordOnMove": true,
     "RecordInterval": 0.1,
     "Cameras": [
-        { "CameraName": "front_center", "ImageType": 0, "PixelsAsFloat": false, "Compress": true },
-        { "CameraName": "bottom_center", "ImageType": 0, "PixelsAsFloat": false, "Compress": true }
+        { "CameraName": "front_center", "ImageType": 0, "PixelsAsFloat": false, "Compress": true }
     ]
   },
   "CameraDefaults": {
     "CaptureSettings": [
       {
         "ImageType": 0,
-        "Width": 640,
-        "Height": 480,
+        "Width": 1000,
+        "Height": 1000,
         "FOV_Degrees": 90,
         "AutoExposureSpeed": 100,
         "MotionBlurAmount": 0
       }
     ]
-  },
-  "SubWindows": [
-    {"WindowID": 0, "CameraName": "front_left", "ImageType": 0, "VehicleName": "", "Visible": true},
-    {"WindowID": 1, "CameraName": "bottom_center", "ImageType": 0, "VehicleName": "", "Visible": true},
-    {"WindowID": 2, "CameraName": "front_right", "ImageType": 0, "VehicleName": "", "Visible": true}
-  ]
+  }
 }
