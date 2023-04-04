@@ -22,33 +22,33 @@ airsim.wait_key('Press any key to get images')
 tmp_dir = os.path.join(tempfile.gettempdir(), "airsim_drone")
 print ("Saving images to %s" % tmp_dir)
 try:
-    for n in range(2):
-        os.makedirs(os.path.join(tmp_dir, str(n)))
+    os.makedirs(tmp_dir)
 except OSError:
     if not os.path.isdir(tmp_dir):
         raise
+    
+increment = 0
+step = 10
+z = -100
+degree = -90
 
-for x in range(50): # do few times
-    #xn = 1 + x*5  # some random number
-    client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(x, 0, -50), airsim.to_quaternion(math.radians(-30), 0, 0)), True)
-    time.sleep(0.1)
+for y in range(-150, +150, step):
+    for x in range(-150, +150, step):
+        client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(x, y, z), airsim.to_quaternion(math.radians(degree), 0, 0)), True)
+        time.sleep(0.1)
 
-    responses = client.simGetImages([
-        airsim.ImageRequest("front_center", airsim.ImageType.Scene),
-        airsim.ImageRequest("bottom_center", airsim.ImageType.Scene)])
+        responses = client.simGetImages([airsim.ImageRequest("front_center", airsim.ImageType.Scene)])
+        response = responses[0]
 
-    for i, response in enumerate(responses):
-        if response.pixels_as_float:
-            print("Type %d, size %d, pos %s" % (response.image_type, len(response.image_data_float), pprint.pformat(response.camera_position)))
-            airsim.write_pfm(os.path.normpath(os.path.join(tmp_dir, str(x) + "_" + str(i) + '.pfm')), airsim.get_pfm_array(response))
-        else:
-            print("Type %d, size %d, pos %s" % (response.image_type, len(response.image_data_uint8), pprint.pformat(response.camera_position)))
-            airsim.write_file(os.path.normpath(os.path.join(tmp_dir, str(i), str(x) + "_" + str(i) + '.png')), response.image_data_uint8)
+        print(pprint.pformat(response.camera_position))
+        airsim.write_file(os.path.normpath(os.path.join(tmp_dir, str(increment) + "_" + str(x) + "_" + str(y) + str(z) + '.png')), response.image_data_uint8)
+        print(str(increment) + "_" + str(x) + "_" + str(y) + str(z) + '.png')
+        increment += 1
 
     pose = client.simGetVehiclePose()
     pp.pprint(pose)
 
-    time.sleep(0.2)
+    time.sleep(0.1)
 
 # currently reset() doesn't work in CV mode. Below is the workaround
 client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(0, 0, 0), airsim.to_quaternion(0, 0, 0)), True)
