@@ -27,28 +27,49 @@ except OSError:
     if not os.path.isdir(tmp_dir):
         raise
     
-increment = 0
-step = 10
-z = -100
-degree = -90
+increment = 1
+step = 20
+z = -70
+up = 151 #150+1 for range last element
+down = -150
 
-for y in range(-150, +150, step):
-    for x in range(-150, +150, step):
-        client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(x, y, z), airsim.to_quaternion(math.radians(degree), 0, 0)), True)
-        time.sleep(0.1)
+for layer in [1, 2, 3, 4]:
+    for y in range(down, up, step):
+        for x in range(down, up, step):
+            for pitch in [-120, -90, -60]:
+                for yaw in [-90, 0]:
+                    if pitch == -90 & yaw == -90:
+                        continue
+                    client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(x, y, z), airsim.to_quaternion(math.radians(pitch), 0, math.radians(yaw))), True)
+                    time.sleep(0.1)
 
-        responses = client.simGetImages([airsim.ImageRequest("front_center", airsim.ImageType.Scene)])
-        response = responses[0]
+                    responses = client.simGetImages([airsim.ImageRequest("front_center", airsim.ImageType.Scene)])
+                    response = responses[0]
 
-        print(pprint.pformat(response.camera_position))
-        airsim.write_file(os.path.normpath(os.path.join(tmp_dir, str(increment) + "_" + str(x) + "_" + str(y) + str(z) + '.png')), response.image_data_uint8)
-        print(str(increment) + "_" + str(x) + "_" + str(y) + str(z) + '.png')
-        increment += 1
-
-    pose = client.simGetVehiclePose()
-    pp.pprint(pose)
-
-    time.sleep(0.1)
+                    print(pprint.pformat(response.camera_position))
+                    airsim.write_file(os.path.normpath(os.path.join(tmp_dir, "Layer" + str(layer) 
+                                                                            + "_" + str(increment) 
+                                                                            + "_z" + str(z) 
+                                                                            + "_y" + str(y) 
+                                                                            + "_x" + str(x) 
+                                                                            + "_pitch" + str(pitch)
+                                                                            + "_yaw" + str(yaw) + '.png')), response.image_data_uint8)
+                    print(  "Layer" + str(layer) 
+                            + "_" + str(increment) 
+                            + "_z" + str(z) 
+                            + "_y" + str(y) 
+                            + "_x" + str(x) 
+                            + "_pitch" + str(pitch)
+                            + "_yaw" + str(yaw) + '.png')
+                    increment += 1
+            
+        pose = client.simGetVehiclePose()
+        pp.pprint(pose)
+        
+    up -= 20
+    down += 20
+    z -= 20
+    
 
 # currently reset() doesn't work in CV mode. Below is the workaround
 client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(0, 0, 0), airsim.to_quaternion(0, 0, 0)), True)
