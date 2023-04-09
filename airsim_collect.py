@@ -2,7 +2,6 @@
 # https://github.com/Microsoft/AirSim/blob/main/docs/image_apis.md#computer-vision-mode
 
 import airsim
-
 import pprint
 import tempfile
 import os
@@ -14,12 +13,13 @@ pp = pprint.PrettyPrinter(indent=4)
 client = airsim.VehicleClient()
 
 airsim.wait_key('Press any key to get camera parameters')
-for camera_id in range(2):
-    camera_info = client.simGetCameraInfo(str(camera_id))
-    print("CameraInfo %d: %s" % (camera_id, pp.pprint(camera_info)))
+camera_info = client.simGetCameraInfo("front_center")
+print("Font Center CameraInfo : %s" % (pp.pprint(camera_info)))
 
-airsim.wait_key('Press any key to get images')
-tmp_dir = os.path.join(tempfile.gettempdir(), "airsim_drone")
+airsim.wait_key('Press any key to start getting images')
+directory = r"G:\Drive'ım\Dataset\AirSimNH"
+tmp_dir = os.path.join(directory, "airsim_drone")
+
 print ("Saving images to %s" % tmp_dir)
 try:
     os.makedirs(tmp_dir)
@@ -30,18 +30,18 @@ except OSError:
 increment = 1
 step = 20
 z = -70
-up = 151 #150+1 for range last element
-down = -150
+up = 111 #150+1 for range last element
+down = -110
 
-for layer in [1, 2, 3, 4]:
+for layer in [1, 2, 3]:
     for y in range(down, up, step):
         for x in range(down, up, step):
             for pitch in [-120, -90, -60]:
                 for yaw in [-90, 0]:
-                    if pitch == -90 & yaw == -90:
+                    if pitch == -90 and yaw == -90:
                         continue
                     client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(x, y, z), airsim.to_quaternion(math.radians(pitch), 0, math.radians(yaw))), True)
-                    time.sleep(0.1)
+                    time.sleep(1)
 
                     responses = client.simGetImages([airsim.ImageRequest("front_center", airsim.ImageType.Scene)])
                     response = responses[0]
@@ -64,11 +64,11 @@ for layer in [1, 2, 3, 4]:
                     increment += 1
             
         pose = client.simGetVehiclePose()
-        pp.pprint(pose)
-        
-    up -= 20
-    down += 20
+        pp.pprint(pose)   
+    up -= 10
+    down += 10
     z -= 20
+step += 5
     
 
 # currently reset() doesn't work in CV mode. Below is the workaround
