@@ -17,8 +17,7 @@ camera_info = client.simGetCameraInfo("front_center")
 print("Font Center CameraInfo : %s" % (pp.pprint(camera_info)))
 
 airsim.wait_key('Press any key to start getting images')
-directory = r"G:\Drive'ım\Dataset\AirSimNH"
-tmp_dir = os.path.join(directory, "airsim_drone")
+tmp_dir = r"G:\Drive'ım\Dataset\AirSimNH"
 
 print ("Saving images to %s" % tmp_dir)
 try:
@@ -41,7 +40,7 @@ for layer in [1, 2, 3]:
                     if pitch == -90 and yaw == -90:
                         continue
                     client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(x, y, z), airsim.to_quaternion(math.radians(pitch), 0, math.radians(yaw))), True)
-                    time.sleep(1)
+                    time.sleep(0.1)
 
                     responses = client.simGetImages([airsim.ImageRequest("front_center", airsim.ImageType.Scene)])
                     response = responses[0]
