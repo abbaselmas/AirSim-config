@@ -60,15 +60,11 @@ for layer in [1, 2, 3]:
                             + "_x" + str(x) 
                             + "_pitch" + str(pitch)
                             + "_yaw" + str(yaw) + '.png')
-                    increment += 1
-            
-        pose = client.simGetVehiclePose()
-        pp.pprint(pose)   
+                    increment += 1  
     up -= 10
     down += 10
     z -= 20
-step += 5
-    
+    step += 5
 
 # currently reset() doesn't work in CV mode. Below is the workaround
 client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(0, 0, 0), airsim.to_quaternion(0, 0, 0)), True)
