@@ -14,8 +14,8 @@
     "CaptureSettings": [
       {
         "ImageType": 0,
-        "Width": 5472,
-        "Height": 3648,
+        "Width": 640,
+        "Height": 480,
         "FOV_Degrees": 90,
         "AutoExposureSpeed": 100,
         "MotionBlurAmount": 0
