@@ -27,7 +27,7 @@ except OSError:
         raise
     
 increment = 1
-step = 20
+step = 25
 z = -70
 up = 111 #150+1 for range last element
 down = -110
@@ -61,9 +61,9 @@ for layer in [1, 2, 3]:
                             + "_pitch" + str(pitch)
                             + "_yaw" + str(yaw) + '.png')
                     increment += 1  
-    up -= 10
-    down += 10
-    z -= 20
+    up -= 20
+    down += 20
+    z -= 30
     step += 5
 
 # currently reset() doesn't work in CV mode. Below is the workaround
