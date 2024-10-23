@@ -14,10 +14,10 @@ client = airsim.VehicleClient()
 
 airsim.wait_key('Press any key to get camera parameters')
 camera_info = client.simGetCameraInfo("front_center")
-print("Font Center CameraInfo : %s" % (pp.pprint(camera_info)))
+print("Front Center CameraInfo : %s" % (pp.pprint(camera_info)))
 
 airsim.wait_key('Press any key to start getting images')
-tmp_dir = r"G:\Drive'ım\Dataset\AirSimNH"
+tmp_dir = r"D:\GDrive\Drive'ım\Dataset\AirSimNH"
 
 print ("Saving images to %s" % tmp_dir)
 try:
@@ -60,7 +60,7 @@ for layer in [1, 2, 3]:
                             + "_x" + str(x) 
                             + "_pitch" + str(pitch)
                             + "_yaw" + str(yaw) + '.png')
-                    increment += 1  
+                    increment += 1
     up -= 20
     down += 20
     z -= 30
