@@ -17,7 +17,7 @@ except OSError:
 
 increment = 1
 step = 40
-z = -40
+z = -60
 up = 160  # Y-axis upper bound
 down = -160  # Y-axis lower bound
 
