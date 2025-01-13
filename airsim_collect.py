@@ -7,59 +7,97 @@ import math
 pp = pprint.PrettyPrinter(indent=4)
 client = airsim.VehicleClient()
 
-airsim.wait_key('Press any key to start getting images')
-tmp_dir = r"D:\GDrive\Drive'ım\Dataset\AirSimNH"
+# Configuration
+tmp_dir = r"D:\GDrive\Drive'ım\Dataset\AirSimNH-natural"
 print("Saving images to %s" % tmp_dir)
+
 try:
-    os.makedirs(tmp_dir, exist_ok=True)  # Ensure the root directory exists
+    os.makedirs(tmp_dir, exist_ok=True)
 except OSError:
     raise
 
+# Photogrammetry parameters
+FOV = 90  # degrees
+STEP = 53  # Optimized step size
+OVERLAP = 0.70  # 70% overlap
+
+# Layer configurations with optimized heights and aligned nodes
+layer_configs = {
+    1: {  # Top layer (3x3)
+        "size": 3,
+        "altitude": -140,
+        "points": [-50, 0, 50]
+    },
+    2: {  # Middle layer (5x5)
+        "size": 5,
+        "altitude": -110,
+        "points": [-100, -50, 0, 50, 100]
+    },
+    3: {  # Bottom layer (7x7)
+        "size": 7,
+        "altitude": -80,
+        "points": [-150, -100, -50, 0, 50, 100, 150]
+    }
+}
+
+# Camera settings
+PITCH_ANGLE = -60
 increment = 1
-step = 40
-z = -60
-up = 160  # Y-axis upper bound
-down = -160  # Y-axis lower bound
+
+print(f"\nPhotogrammetry Survey Configuration:")
+print(f"Field of View: {FOV}°")
+print(f"Overlap: {OVERLAP*100}%")
+print(f"Step size: {STEP} units")
 
 for layer in [1, 2, 3]:
-    serpentine = True  # Used to toggle y-direction
-    for y in range(down, up+1, step):  # Move along x-axis in one direction for the entire layer
-        if serpentine:
-            x_range = range(down, up+1, step)  # Move upwards
+    config = layer_configs[layer]
+    altitude = config["altitude"]
+    size = config["size"]
+    points = config["points"]
+    
+    # Calculate ground coverage at this height
+    ground_coverage = 2 * abs(altitude)
+    effective_overlap = 1 - (STEP / ground_coverage)
+    
+    print(f"\nLayer {layer} ({size}x{size}):")
+    print(f"Altitude: {abs(altitude)} units")
+    print(f"Ground coverage per image: {ground_coverage:.1f} units")
+    print(f"Effective overlap: {effective_overlap*100:.1f}%")
+    print(f"Points: {points}")
+    
+    moving_right = True
+    
+    for y in points:
+        if moving_right:
+            x_range = points
+            YAW_ANGLE = 0
         else:
-            x_range = range(up, down-1, -step)  # Move downwards
-            
-        for x in x_range:
-            for pitch in [-120, -90, -60]:
-                for yaw in [-90, 0]:
-                    if pitch == -90 and yaw == -90:
-                        continue
-                    
-                    # Set vehicle pose
-                    client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(x, y, z), airsim.to_quaternion(math.radians(pitch), 0, math.radians(yaw))), True)
-                    time.sleep(0.1)
-
-                    # Get image response
-                    responses = client.simGetImages([airsim.ImageRequest("front_center", airsim.ImageType.Scene)])
-                    response = responses[0]
-
-                    # Create the necessary folder for each combination of Layer, pitch, and yaw
-                    folder_path = os.path.join(tmp_dir, f"Layer{layer}/pitch{pitch}_yaw{yaw}")
-                    os.makedirs(folder_path, exist_ok=True)  # Ensure the folder is created
-
-                    # Save the image to the folder
-                    image_path = os.path.join(folder_path, f"{increment}_z{z}_y{y}_x{x}.png")
-                    airsim.write_file(os.path.normpath(image_path), response.image_data_uint8)
-
-                    print(f"Saved {image_path}")
-                    increment += 1
+            x_range = points[::-1]
+            YAW_ANGLE = 180
         
-        # Toggle y-direction after each x-row to get serpentine effect
-        serpentine = not serpentine
-
-    down += step
-    up -= step
-    z -= step
+        for x in x_range:
+            pose = airsim.Pose(
+                airsim.Vector3r(x, y, altitude),
+                airsim.to_quaternion(math.radians(PITCH_ANGLE), 0, math.radians(YAW_ANGLE))
+            )
+            client.simSetVehiclePose(pose, True)
+            
+            time.sleep(0.1)
+            
+            responses = client.simGetImages([
+                airsim.ImageRequest("front_center", airsim.ImageType.Scene)
+            ])
+            
+            folder_path = os.path.join(tmp_dir, f"Layer{layer}")
+            os.makedirs(folder_path, exist_ok=True)
+            
+            image_path = os.path.join(folder_path, f"{increment}_z{altitude}_y{y}_x{x}.png")
+            airsim.write_file(os.path.normpath(image_path), responses[0].image_data_uint8)
+            
+            print(f"Saved {image_path}")
+            increment += 1
+        
+        moving_right = not moving_right
 
 # Reset vehicle pose
 client.simSetVehiclePose(airsim.Pose(airsim.Vector3r(0, 0, 0), airsim.to_quaternion(0, 0, 0)), True)
